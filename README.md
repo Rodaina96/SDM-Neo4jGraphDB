@@ -16,7 +16,7 @@ bin\neo4j-admin import --id-type=INTEGER
 --nodes:Authors import/GraphDB/authors.csv 
 --nodes:Articles import/GraphDB/articles.csv 
 --nodes:Journals import/GraphDB/journals.csv 
---nodes:Proceedins import/GraphDB/proceedins.csv 
+--nodes:Proceedings import/GraphDB/proceedins.csv 
 --nodes:Workshops import/GraphDB/workshops.csv  
 --nodes:Conferences import/GraphDB/conferences.csv 
 --nodes:Topic import/GraphDB/topics.csv 
@@ -30,4 +30,7 @@ bin\neo4j-admin import --id-type=INTEGER
 --relationships:has import/GraphDB/articles_topics.csv 
 --relationships:of_keys import/GraphDB/topics_keywords.csv 
 --relationships:cited import/GraphDB/citation.csv 
+--relationships:reviewed import/GraphDB/reviewer1.csv
+--relationships:reviewed import/GraphDB/reviewer2.csv 
+--relationships:reviewed import/GraphDB/reviewer3.csv 
 --ignore-missing-nodes=true
