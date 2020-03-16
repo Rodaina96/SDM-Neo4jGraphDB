@@ -1,0 +1,27 @@
+--Query 1--
+MATCH (a:Authors)-[w:write]->(ar:Articles)<-[c:cited]-(ar2:Articles)
+WITH a.author as Author, ar.article_id as Article_id,
+count(c) as nCitation
+ORDER BY Author, nCitation DESC
+WITH Author, collect(nCitation) as citation
+UNWIND range(1, size(citation)) as i
+WITH Author,
+CASE WHEN citation[i] <= (i)
+THEN citation[i]
+ELSE (i)
+END as article_index
+RETURN Author, max(article_index) as hIndex
+
+--Query 2--
+Match (c:Conferences)<-[is:is_c]-(p:Proceedings)-[pb:published_p]->(a:Articles)<-[ct:cited]-(a2:Articles)
+With c.title as Conference, a.tt as Article, count(ct) as nbCitations
+Order By nbCitations DESC
+WITH Conference, collect(Article) as articles
+return Conference, articles[0] AS Top1 ,articles[1] as Top2,articles[3] as Top3
+
+--Query3--
+MATCH (a:Authors)-[:write]->(:Articles)<-[:published_p]-(:Proceedings)-[ic:is_c]->(c:Conferences)
+WITH c.title as Conference, a.author as Author,
+count(distinct ic.year) as editions
+where editions>=4
+RETURN Conference, collect(Author) as ListAuthors
