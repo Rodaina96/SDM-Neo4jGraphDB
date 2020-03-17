@@ -25,3 +25,11 @@ WITH c.title as Conference, a.author as Author,
 count(distinct ic.year) as editions
 where editions>=4
 RETURN Conference, collect(Author) as ListAuthors
+
+
+--Query4--
+MATCH (ar2:Articles)-[c:cited]->(ar:Articles)-[p:published]->(j:Journals)
+WITH j.JournalName as JournalName, ar.article_id as article, p.volume as volume,count(ar2.article_id) as citation
+WHERE toFloat(volume) in [(toFloat(volume)-1), (toFloat(volume)-2)]
+RETURN JournalName,  sum(citation)/count(article)  as ImpactFactor
+ORDER BY ImpactFactor DESC
