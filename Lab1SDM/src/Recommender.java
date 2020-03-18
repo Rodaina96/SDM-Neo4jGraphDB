@@ -1,9 +1,5 @@
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Session;
@@ -18,26 +14,10 @@ public class Recommender {
 	public static Result runQ(String q) throws Exception {
 		Result result;
 		QResult qr = new QResult();
-//		 try ( NeoConnection con = new NeoConnection( "bolt://localhost:7687", "neo4j", "neo4j" ) )
-//	        {
 		NeoConnection con = new NeoConnection("bolt://localhost:7687", "neo4j", "neo4j");
 		Driver driver = con.getDriver();
 		Session session = driver.session();
 		result = session.run(q);
-//	            try ( Session session = driver.session() )
-//		        {
-//	            	result = session.run(q);
-//	            	
-//	            	 while ( result.hasNext() ) {
-//	       	   		  Record row = result.next();
-//	       	   		  Value x = row.get(title);
-//	       	   		  List<Object> y = x.asList();
-//	       	   		  qr.add(y);
-//
-//	       	   	 }
-//		            
-//		        }
-//	        }
 		return result;
 	}
 
@@ -85,7 +65,6 @@ public class Recommender {
 
 		while (aConf.hasNext()) {
 			Record tot = aConf.next();
-//			System.out.println(tot);
 			total.put(tot.get("confID").asInt(), tot.get("totalArConf").asInt());
 		}
 
@@ -97,10 +76,7 @@ public class Recommender {
 		HashMap<Integer, Integer> dbCount = new HashMap();
 
 		while (db_aConf.hasNext()) {
-			Record tot = db_aConf.next();
-//			System.out.println(tot);
-			//System.out.println(tot.get("confID")+"   "+tot.get("ndDBArticles"));
-			dbCount.put(tot.get("confID").asInt(),
+			Record tot = db_aConf.next();dbCount.put(tot.get("confID").asInt(),
 					tot.get("ndDBArticles") == null ? 0 : tot.get("ndDBArticles").asInt());
 		}
 		String dbConfs = "";
@@ -114,7 +90,7 @@ public class Recommender {
 			
 		}
 		dbConfs = dbConfs.substring(1, dbConfs.length()-1);
-		//System.out.println(dbConfs);
+
 		// create edge from conf to db community node
 
 		String edgeCC = "Match (c:Conferences)\r\n" + 
@@ -160,7 +136,7 @@ public class Recommender {
 			
 		}
 		dbJournals = dbJournals.substring(1, dbJournals.length()-1);
-		//System.out.println(dbJournals);
+
 		
 		// create edge from journals to db community node
 
@@ -168,8 +144,7 @@ public class Recommender {
 						"where j.journal_ID IN ["+dbJournals+"]\r\n" + 
 						"CREATE (j)-[r:jinComm]->(cm:Community)";
 
-				//System.out.println(edgeJC);
-				 //runer.runQ(edgeJC);
+
 
 		// do the page rank alg and get top 100 out of the articles of the db community
 		String ranking = "CALL algo.pageRank.stream('Articles', 'cites', {iterations:1, dampingFactor:0.8}) " + 
@@ -192,6 +167,28 @@ public class Recommender {
     		 		"RETURN type(r), r.score";
     		 //runer.runQ(updateRank);
 		}
+		
+		//create a new node guru
+		
+		//find gurus
+		String createGuru = "CREATE (guru : Guru {name: \"Database Guru\"})";
+		//runer.runQ(createGuru);
+		
+		String getGurus = "Match(a:Authors)-[w:write]->(ar:Articles)-[r:rank]->(c:Community)\r\n" + 
+				" WITH a.author_id as author_id, a.author as author_name, count(distinct r)>=2 as count\r\n" + 
+				"RETURN collect(distinct author_id) as Gurus";
+		
+		Result dbGurus = runQ(getGurus);
+		Value db_Gurus = dbGurus.next().get("Gurus");
+		
+		// create an edge between authors and guru for this DB community
+
+		String edgeGurus = "Match (a:Authors)\r\n" + 
+				"where a.author_id IN "+db_Gurus+"\r\n" + 
+				"CREATE (a)-[r:is_guru]->(g:Guru)";
+		
+		runer.runQ(edgeGurus);
+		
 		
 	}
 
