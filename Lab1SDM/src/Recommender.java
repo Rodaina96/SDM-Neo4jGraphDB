@@ -169,9 +169,30 @@ public class Recommender {
 						"CREATE (j)-[r:jinComm]->(cm:Community)";
 
 				//System.out.println(edgeJC);
-				 runer.runQ(edgeJC);
+				 //runer.runQ(edgeJC);
 
-
+		// do the page rank alg and get top 100 out of the articles of the db community
+		String ranking = "CALL algo.pageRank.stream('Articles', 'cites', {iterations:1, dampingFactor:0.8}) " + 
+				"YIELD nodeId, score " + 
+				"WITH algo.getNodeById(nodeId).article_id AS article,score " + 
+				"WHERE article IN " + dbArticles+
+				" RETURN article, score\r\n" + 
+				"ORDER BY score DESC LIMIT 100";
+		
+		//create a new edge to hold the rank only for the top 100 ranked articles of db community
+		Result db_ranking = runQ(ranking);
+		while (db_ranking.hasNext())
+		{
+			 Record row = db_ranking.next();
+			 Value article = row.get("article");
+			 Value score = row.get("score");
+    		 String updateRank = "MATCH (a:Articles)-[in:ainComm]->(c:Community)\r\n" + 
+    		 		"where a.article_id = "+article+
+    		 		" CREATE (a)-[r:rank { score: "+score+"}]->(c)\r\n" + 
+    		 		"RETURN type(r), r.score";
+    		 //runer.runQ(updateRank);
+		}
+		
 	}
 
 }
