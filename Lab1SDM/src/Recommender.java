@@ -25,7 +25,7 @@ public class Recommender {
 		QueryRunner runer = new QueryRunner();
 		// first we create a new node to have the DB Community in our graph
 		String createNode = "CREATE (community:Community{name: \"Database\"})";
-		// runer.runQ(q2);
+		 runer.runQ(createNode);
 
 		// we find the list of articles in the database community
 		String q1 = "Match(a:Articles)-[h:has]->(t:Topic)-[o:of_keys]->(k:Keywords)\r\n"
@@ -45,13 +45,13 @@ public class Recommender {
 				+ "			\"Data processing\",\r\n" + "            \"Data storage\",\r\n"
 				+ "            \"Data querying\"]\r\n" + "CREATE (a)-[r:dbkey]->(k)\r\n" + "RETURN type(r)";
 
-		// runer.runQ(q2);
+		 runer.runQ(q2);
 
 		// create an edge between articles and DB community node
 		String edgeAC = "Match (a:Articles)\r\n" + "		 where a.article_id IN" + dbArticles
 				+ "		 CREATE (a)-[r:ainComm]->(c:Community)";
 
-		// runer.runQ(edgeAC);
+		 runer.runQ(edgeAC);
 
 		// After getting the results of q1, we will get all those conferences
 		// that have 90% papers belonging to the DB community
@@ -97,7 +97,7 @@ public class Recommender {
 				"where c.confID IN ["+dbConfs+"]\r\n" + 
 				"CREATE (c)-[r:cinComm]->(cm:Community)";
 
-		 //runer.runQ(edgeCC);
+		 runer.runQ(edgeCC);
 
 		// same for journals find dbJounals and create edge
 
@@ -143,7 +143,8 @@ public class Recommender {
 				String edgeJC = "Match (j:Journals)\r\n" + 
 						"where j.journal_ID IN ["+dbJournals+"]\r\n" + 
 						"CREATE (j)-[r:jinComm]->(cm:Community)";
-
+				
+				runer.runQ(edgeJC);
 
 
 		// do the page rank alg and get top 100 out of the articles of the db community
@@ -165,14 +166,14 @@ public class Recommender {
     		 		"where a.article_id = "+article+
     		 		" CREATE (a)-[r:rank { score: "+score+"}]->(c)\r\n" + 
     		 		"RETURN type(r), r.score";
-    		 //runer.runQ(updateRank);
+    		 runer.runQ(updateRank);
 		}
 		
 		//create a new node guru
 		
 		//find gurus
 		String createGuru = "CREATE (guru : Guru {name: \"Database Guru\"})";
-		//runer.runQ(createGuru);
+		runer.runQ(createGuru);
 		
 		String getGurus = "Match(a:Authors)-[w:write]->(ar:Articles)-[r:rank]->(c:Community)\r\n" + 
 				" WITH a.author_id as author_id, a.author as author_name, count(distinct r)>=2 as count\r\n" + 
