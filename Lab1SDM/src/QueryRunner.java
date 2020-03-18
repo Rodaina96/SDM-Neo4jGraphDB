@@ -1,14 +1,9 @@
-import java.security.KeyStore.Entry;
-import java.util.Map;
 
-import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Result;
-import org.neo4j.driver.Transaction;
-import org.neo4j.driver.TransactionWork;
+
 
 public class QueryRunner {
 	
@@ -51,7 +46,7 @@ public class QueryRunner {
 				"RETURN Author, max(article_index) as hIndex";
 		 
 		 String q2 = "Match (c:Conferences)<-[is:is_c]-(p:Proceedings)-[pb:published_p]->(a:Articles)<-[ct:cited]-(a2:Articles)\r\n" + 
-		 		"With c.title as Conference, a.tt as Article, count(ct) as nbCitations\r\n" + 
+		 		"With c.title as Conference, a.sup as Article, count(ct) as nbCitations\r\n" + 
 		 		"Order By nbCitations DESC\r\n" + 
 		 		"WITH Conference, collect(Article) as articles\r\n" + 
 		 		"return Conference, articles[0] AS Top1 ,articles[1] as Top2,articles[3] as Top3";
@@ -68,11 +63,20 @@ public class QueryRunner {
 		 		"RETURN JournalName,  sum(citation)/count(article)  as ImpactFactor\r\n" + 
 		 		"ORDER BY ImpactFactor DESC";
 		 
-		 runQ(q2);
+		 String alg1 = "CALL algo.pageRank.stream('Articles', 'cited', {iterations:20, dampingFactor:0.85})\r\n" + 
+			 		"YIELD nodeId, score\r\n" + 
+			 		"RETURN algo.asNode(nodeId).sup AS page,score\r\n" + 
+			 		"ORDER BY score DESC\r\n" + 
+			 		"limit 10";
+		 
+		 String alg2 = "CALL algo.louvain(\r\n" + 
+		 		"  'MATCH (p:Articles) RETURN id(p) as id',\r\n" + 
+		 		"  'MATCH (p1:Articles)-[:has]->(:Topic)<-[:has]-(p2:Articles)\r\n" + 
+		 		"   RETURN id(p1) as source, id(p2) as target, count(*) as weight',\r\n" + 
+		 		"  {graph:'cypher', iterations:2, write: true});";
+		 
+		 runQ(alg2);
 	       
 	    }
 
-	
-
-	
 }
