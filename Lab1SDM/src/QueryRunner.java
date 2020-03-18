@@ -7,6 +7,13 @@ import org.neo4j.driver.Result;
 
 public class QueryRunner {
 	
+	
+	
+	public QueryRunner() {
+	}
+
+
+
 	static Result result;
 
 	public static void runQ(String q) throws Exception
