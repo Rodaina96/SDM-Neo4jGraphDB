@@ -121,18 +121,56 @@ public class Recommender {
 				"where c.confID IN ["+dbConfs+"]\r\n" + 
 				"CREATE (c)-[r:cinComm]->(cm:Community)";
 
-		 runer.runQ(edgeCC);
+		 //runer.runQ(edgeCC);
 
 		// same for journals find dbJounals and create edge
 
-//		Result r1 = runQ(conf_article);
-//		while(r1.hasNext()) {
-//			  Record row = result.next();
-////   	   		  Value x = row.get(title);
-////   	   		  List<Object> y = x.asList();
-////   	   		  qr.add(y);
-//
-//		}
+		String ar_journal = "Match (ar:Articles)-[pb:published]-(j:Journals)\r\n" + 
+				"Return j.journal_ID as journal_ID, count(distinct ar.article_id) as totalArJournal Order by j.journal_ID";
+
+		Result aJournal = runQ(ar_journal);
+
+		HashMap<Integer, Integer> totalJournal = new HashMap();
+
+		while (aJournal.hasNext()) {
+			Record totJ = aJournal.next();
+			totalJournal.put(totJ.get("journal_ID").asInt(), totJ.get("totalArJournal").asInt());
+		}
+		
+		String db_ar_journal = "MATCH (cm:Community)<-[acm:ainComm]-(ar2:Articles)-[:published]->(j:Journals)\r\n" + 
+				"with j,count(distinct ar2.article_id) As nDBjournals \r\n" + 
+				"RETURN j.journal_ID as journal_ID, nDBjournals Order by j.journal_ID";
+
+		Result db_JournalA = runQ(db_ar_journal);
+		HashMap<Integer, Integer> dbCountJ = new HashMap();
+
+		while (db_JournalA.hasNext()) {
+			Record tot2 = db_JournalA.next();
+			dbCountJ.put(tot2.get("journal_ID").asInt(),
+					tot2.get("nDBjournals") == null ? 0 : tot2.get("nDBjournals").asInt());
+		}
+		String dbJournals = "";
+		for (Integer key : totalJournal.keySet()) {
+			int db2=dbCountJ.get(key)==null?0:dbCountJ.get(key);
+			float ratio2 = (float)db2/totalJournal.get(key);
+			if (ratio2 >= 0.5)
+					{
+						dbJournals+=","+key;
+					}
+			
+		}
+		dbJournals = dbJournals.substring(1, dbJournals.length()-1);
+		//System.out.println(dbJournals);
+		
+		// create edge from journals to db community node
+
+				String edgeJC = "Match (j:Journals)\r\n" + 
+						"where j.journal_ID IN ["+dbJournals+"]\r\n" + 
+						"CREATE (j)-[r:jinComm]->(cm:Community)";
+
+				//System.out.println(edgeJC);
+				 runer.runQ(edgeJC);
+
 
 	}
 
