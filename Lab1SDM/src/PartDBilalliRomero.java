@@ -6,7 +6,7 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.Result;
 
-public class Recommender {
+public class PartDBilalliRomero {
 
 	String[] keywords = { "Data management", "Indexing", "Data modeling", "Big Data", "Data processing", "Data storage",
 			"Data querying" };
@@ -22,7 +22,7 @@ public class Recommender {
 	}
 
 	public static void main(String... args) throws Exception {
-		QueryRunner runer = new QueryRunner();
+		PartBBilalliRomero runer = new PartBBilalliRomero();
 		// first we create a new node to have the DB Community in our graph
 		String createNode = "CREATE (community:Community{name: \"Database\"})";
 		 runer.runQ(createNode);

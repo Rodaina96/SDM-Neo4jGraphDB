@@ -5,11 +5,11 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.Result;
 
 
-public class QueryRunner {
+public class PartBBilalliRomero {
 	
 	
 	
-	public QueryRunner() {
+	public PartBBilalliRomero() {
 	}
 
 
@@ -70,18 +70,8 @@ public class QueryRunner {
 		 		"RETURN JournalName,  sum(citation)/count(article)  as ImpactFactor\r\n" + 
 		 		"ORDER BY ImpactFactor DESC";
 		 
-		 String alg1 = "CALL algo.pageRank.stream('Articles', 'cited', {iterations:20, dampingFactor:0.85})\r\n" + 
-			 		"YIELD nodeId, score\r\n" + 
-			 		"RETURN algo.asNode(nodeId).sup AS page,score\r\n" + 
-			 		"ORDER BY score DESC\r\n" + 
-			 		"limit 10";
-		 
-		 String alg2 = "CALL algo.louvain.stream('Articles','cited',{direction:'outgoing'})"
-		 		+ "Yield nodeId, community, communities"
-		 		+ "Return algo.asNode(nodeId).sup as title, community"
-		 		+ "Order by community DESC";
-		 
-		 runQ(alg2);
+		
+		 runQ(q1);
 	       
 	    }
 
