@@ -76,11 +76,10 @@ public class QueryRunner {
 			 		"ORDER BY score DESC\r\n" + 
 			 		"limit 10";
 		 
-		 String alg2 = "CALL algo.louvain(\r\n" + 
-		 		"  'MATCH (p:Articles) RETURN id(p) as id',\r\n" + 
-		 		"  'MATCH (p1:Articles)-[:has]->(:Topic)<-[:has]-(p2:Articles)\r\n" + 
-		 		"   RETURN id(p1) as source, id(p2) as target, count(*) as weight',\r\n" + 
-		 		"  {graph:'cypher', iterations:2, write: true});";
+		 String alg2 = "CALL algo.louvain.stream('Articles','cited',{direction:'outgoing'})"
+		 		+ "Yield nodeId, community, communities"
+		 		+ "Return algo.asNode(nodeId).sup as title, community"
+		 		+ "Order by community DESC";
 		 
 		 runQ(alg2);
 	       
